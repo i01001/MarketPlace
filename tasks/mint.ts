@@ -23,8 +23,8 @@ task("mint", "Mint tokens on Market Place")
   const mNFT721 = await MNFT721.deploy();
   await mNFT721.deployed();
 
-  const MNF1155 = await hre.ethers.getContractFactory("MNF1155");
-  const mNF1155 = await MNF1155.deploy();
+  const MNFT1155 = await hre.ethers.getContractFactory("MNFT1155");
+  const mNF1155 = await MNFT1155.deploy();
   await mNF1155.deployed();
 
   await marketPlace.connect(sender).setNFT721ContractAddress(mNFT721.address);

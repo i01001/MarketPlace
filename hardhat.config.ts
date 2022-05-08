@@ -32,6 +32,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
     hardhat: {
+      allowUnlimitedContractSize: true,
       forking: {
           url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
           blockNumber: 14639968
