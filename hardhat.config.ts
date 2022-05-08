@@ -6,6 +6,10 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "./tasks/index.ts";
+import "@nomiclabs/hardhat-web3";
+
+
 
 dotenv.config();
 
