@@ -23,4 +23,11 @@ NFT1155 Contract - https://rinkeby.etherscan.io/address/0x82c5b72ece4abc059c08b8
 
 
 
+# Instructions to deploy:
+
+1. Market Place contract to be deployed 
+2. MNFT721 and MNFT1155 to be deployed for creating NFTs from the Market Place contract 
+3. Need to input the MNFT721 and MNFT1155 Contract Address into respective functions within the Market Place contract
+4. Market Place and Market Place with Auto Bid Contracts are separate and can be run independently.
+
 
