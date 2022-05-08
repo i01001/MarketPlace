@@ -63,14 +63,6 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
     event Log(string _function, address _sender, uint256 _value, bytes _data);
     event Rec(string _function, address _sender, uint256 _value);
 
-    // TO DO
-    // add comments
-    // add check if approved
-    // reduce file size
-    // add events for Listing / buying / cancelling / Setting Auction / Bid Auction / Close auction
-    // Add purchase by token Ikhlas option
-    // Add auto bid option upto a limit - new contract
-
     function setNFT721ContractAddress(address _input) public onlyOwner {
         NFT721Contract = _input;
     }
