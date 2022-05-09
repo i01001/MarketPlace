@@ -12,6 +12,7 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 /// @dev All function calls are currently implemented without side effects
 /// @custom:experimental This is an experimental contract.
 contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
+    using Counters for Counters.Counter;
 
     /// @notice Allows users to create NFT,list them or auction them.
     /// @dev Additional features can be added such as batch minting 

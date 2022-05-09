@@ -8,6 +8,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
+/// @title Market Place Contract for NFT minting, listing and auctions (including auto bid)
+/// @author Ikhlas 
+/// @notice The contract does not have the NFT Contract hardcorded and can be used with other NFT Contracts
+/// @dev All function calls are currently implemented without side effects
+/// @custom:experimental This is an experimental contract.
 contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
     using Counters for Counters.Counter;
       
