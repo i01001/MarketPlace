@@ -1,21 +1,34 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
+/// @title Market Place Contract for NFT minting, listing and auctions
+/// @author Ikhlas 
+/// @notice The contract does not have the NFT Contract hardcorded and can be used with other NFT Contracts
+/// @dev All function calls are currently implemented without side effects
+/// @custom:experimental This is an experimental contract.
 contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
-    // using Strings for uint256;
-    using Counters for Counters.Counter;
 
+    /// @notice Allows users to create NFT,list them or auction them.
+    /// @dev Additional features can be added such as batch minting 
+    /// @notice Counters are used for couting the listed items, sold, auction items and sold respectively.
     Counters.Counter public _counterListSale;
     Counters.Counter public _counterListSold;
     Counters.Counter public _counterListAuction;
     Counters.Counter public _counterAuctionSold;
 
+    /// @dev Variables for the contract
+    /// @notice NFT721Contract - to set up the NFT721 contract
+    /// @notice NFT1155Contract - to set up the NFT1155 contract
+    /// @notice ListingPrice - fees to create a listing
+    /// @notice AuctionListingPrice - fees to create an auction
+    /// @notice listsalecomissionpercent - comission percentage on listing selling price
+    /// @notice Auctioncomissionpercent - comission percentage on auction selling price
+    /// @notice Treasury - to calculate the comission balance for the Market Place
     address public NFT721Contract;
     address public NFT1155Contract;
     uint256 public ListingPrice = 10**15;
@@ -24,6 +37,14 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
     uint256 public Auctioncomissionpercent = 10;
     uint256 public treasury;
 
+    /// @dev Struct for Listing created 
+    /// @notice First 3 are address of seller, NFT contract and buyer
+    /// @notice NFTTYPE - False for NFT721; True for NFT1155
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @notice Listing ID - Market Place counter tracking listings
+    /// @notice Token ID - As per the respective NFT Contract 
+    /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
+    /// @notice data - applicable only for NFT1155; generally to be kept empty. In Remix use "[]"; in Hardhat use ""
     struct ItemforSale {
         address payable seller;
         address nftContract;
@@ -36,7 +57,18 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         uint256 amountNFT1155;
         bytes data;
     }
-
+    /// @dev Struct for Auction Listing created 
+    /// @notice First 4 are address of seller, NFT contract and buyer, last bidder
+    /// @notice NFTTYPE - False for NFT721; True for NFT1155
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @notice Auction Status - True for Auction Open; False for Auction Closed
+    /// @notice Auction ID - Market Place counter for auction tracking listings
+    /// @notice Token ID - As per the respective NFT Contract 
+    /// @notice startTime - Time setting up the auction 
+    /// @notice lastbid - last bid value
+    /// @notice numberofbids - count of bids
+    /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
+    /// @notice data - applicable only for NFT1155; generally to be kept empty. In Remix use "[]"; in Hardhat use ""
     struct AuctionListing {
         address payable seller;
         address nftContract;
@@ -57,28 +89,40 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
 
     constructor() {}
 
+    /// @notice Mapping of Listing ID with Listing Struct
+    /// @notice Mapping of Auction ID witth Auction Struct
     mapping(uint256 => ItemforSale) private listingIDtoItems;
     mapping(uint256 => AuctionListing) private auctionIDtoItems;
 
+    /// @notice events for Fall back and receive function
     event Log(string _function, address _sender, uint256 _value, bytes _data);
     event Rec(string _function, address _sender, uint256 _value);
 
+    /// @notice inputting the NFT721 contract
     function setNFT721ContractAddress(address _input) public onlyOwner {
         NFT721Contract = _input;
     }
 
+    /// @notice inputting the NFT1155 contract
     function setNFT1155ContractAddress(address _input) public onlyOwner {
         NFT1155Contract = _input;
     }
 
+    /// @notice inputting the Listing Price (fees for setting up a listing)
     function setListingPrice(uint256 _listingPrice) public onlyOwner {
         ListingPrice = _listingPrice;
     }
 
+    /// @notice inputting the Auction Listing Price (fees for setting up a Auction listing)
     function setAuctionListingPrice(uint256 _listingPrice) public onlyOwner {
         AuctionListingPrice = _listingPrice;
     }
 
+    /// @notice Function to create NFTs - both NFT types
+    /// @param _nftType explained in struct above
+    /// @param _tokenURI explained in struct above
+    /// @dev _amountNFT1155 not applicable for NFT721 (can put in random number)
+    /// @return tokenID of the created NFT
     function createItem(
         bool _nftType,
         string memory _tokenURI,
@@ -116,6 +160,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         }
     }
 
+    /// @notice Function to list items for sale (fixed price)
     function listItem(
         address _nftContract,
         uint256 _tokenID,
@@ -178,7 +223,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         treasury += ListingPrice;
         return _currentItem;
     }
-
+    /// @notice Function to buy items for sale (fixed price)
     function buyItem(uint256 _listingID) public payable returns (bool) {
         require(
             listingIDtoItems[_listingID].buyer == address(0),
@@ -225,14 +270,17 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to set up listing sale comission percent
     function listingSaleComission(uint256 _comission) public onlyOwner {
         listsalecomissionpercent = _comission;
     }
 
+    /// @notice Function to set up Auction listing sale comission percent
     function AuctionSaleComission(uint256 _comission) public onlyOwner {
         Auctioncomissionpercent = _comission;
     }
 
+    /// @notice Function to cancel the listing sale 
     function cancel(uint256 _listingID) public returns (bool) {
         require(
             listingIDtoItems[_listingID].buyer == address(0),
@@ -273,6 +321,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to set up Listing items on Auctions 
     function listItemOnAuction(
         address _nftContract,
         uint256 _tokenID,
@@ -341,6 +390,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return _currentItem;
     }
 
+    /// @notice Function to bid on the auctions listed
     function makeBid(uint256 _auctionID) public payable returns (bool) {
         require(
             msg.value > auctionIDtoItems[_auctionID].lastBid,
@@ -363,6 +413,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to finish auction - can only be done by seller
     function finishAuction(uint256 _auctionID) public returns (bool) {
         require(
             msg.sender == auctionIDtoItems[_auctionID].seller,
@@ -423,6 +474,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to cancel a Auction listing
     function cancelAuction(uint256 _auctionID) public returns (bool) {
         require(
             msg.sender == auctionIDtoItems[_auctionID].seller,
