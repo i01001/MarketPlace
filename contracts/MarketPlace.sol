@@ -58,11 +58,13 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         uint256 amountNFT1155;
         bytes data;
     }
+
     /// @dev Struct for Auction Listing created 
     /// @notice First 4 are address of seller, NFT contract and buyer, last bidder
     /// @notice NFTTYPE - False for NFT721; True for NFT1155
     /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
     /// @notice Auction Status - True for Auction Open; False for Auction Closed
+    /// @notice Starting Price - bids need to be higher than this
     /// @notice Auction ID - Market Place counter for auction tracking listings
     /// @notice Token ID - As per the respective NFT Contract 
     /// @notice startTime - Time setting up the auction 
@@ -475,7 +477,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
-    /// @notice Function to cancel a Auction listing
+    /// @notice Function to cancel an Auction listing
     function cancelAuction(uint256 _auctionID) public returns (bool) {
         require(
             msg.sender == auctionIDtoItems[_auctionID].seller,

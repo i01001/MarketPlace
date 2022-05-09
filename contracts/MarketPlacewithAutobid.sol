@@ -15,12 +15,23 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 /// @custom:experimental This is an experimental contract.
 contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
     using Counters for Counters.Counter;
-      
+
+    /// @notice Allows users to create NFT,list them or auction them.
+    /// @dev Additional features can be added such as batch minting 
+    /// @notice Counters are used for couting the listed items, sold, auction items and sold respectively.
     Counters.Counter public _counterListSale;
     Counters.Counter public _counterListSold;
     Counters.Counter public _counterListAuction;
     Counters.Counter public _counterAuctionSold;
 
+    /// @dev Variables for the contract
+    /// @notice NFT721Contract - to set up the NFT721 contract
+    /// @notice NFT1155Contract - to set up the NFT1155 contract
+    /// @notice ListingPrice - fees to create a listing
+    /// @notice AuctionListingPrice - fees to create an auction
+    /// @notice listsalecomissionpercent - comission percentage on listing selling price
+    /// @notice Auctioncomissionpercent - comission percentage on auction selling price
+    /// @notice Treasury - to calculate the comission balance for the Market Place
     address public NFT721Contract;
     address public NFT1155Contract;
     uint public ListingPrice = 10**15;
@@ -29,6 +40,14 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
     uint public Auctioncomissionpercent = 10;
     uint public treasury;
 
+    /// @dev Struct for Listing created 
+    /// @notice First 3 are address of seller, NFT contract and buyer
+    /// @notice NFTTYPE - False for NFT721; True for NFT1155
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @notice Listing ID - Market Place counter tracking listings
+    /// @notice Token ID - As per the respective NFT Contract 
+    /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
+    /// @notice data - applicable only for NFT1155; generally to be kept empty. In Remix use "[]"; in Hardhat use "
     struct ItemforSale {
         address payable seller;
         address nftContract;
@@ -42,7 +61,20 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         bytes data;
         }
 
-
+    /// @dev Struct for Auction Listing created 
+    /// @notice First 5 are address of seller, NFT contract and buyer, last bidder, Auto bidder
+    /// @notice NFTTYPE - False for NFT721; True for NFT1155
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @notice Auction Status - True for Auction Open; False for Auction Closed
+    /// @notice Starting Price - bids need to be higher than this
+    /// @notice Auction ID - Market Place counter for auction tracking listings
+    /// @notice Token ID - As per the respective NFT Contract 
+    /// @notice startTime - Time setting up the auction 
+    /// @notice Autobidderlimit - maximum limit by the Autobidder set up for the Auto Bid 
+    /// @notice lastbid - last bid value
+    /// @notice numberofbids - count of bids
+    /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
+    /// @notice data - applicable only for NFT1155; generally to be kept empty. In Remix use "[]"; in Hardhat use ""
     struct AuctionListing {
         address payable seller;
         address nftContract;
@@ -65,31 +97,42 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
 
 
     constructor(){
-
     }
 
+    /// @notice Mapping of Listing ID with Listing Struct
+    /// @notice Mapping of Auction ID witth Auction Struct
     mapping(uint256 => ItemforSale) private listingIDtoItems;
     mapping(uint256 => AuctionListing) private auctionIDtoItems;
 
+    /// @notice events for Fall back and receive function
     event Log(string _function, address _sender, uint _value, bytes _data);
     event Rec(string _function, address _sender, uint _value);
 
+    /// @notice inputting the NFT721 contract
     function setNFT721ContractAddress (address _input) public onlyOwner {
         NFT721Contract = _input;
     }
 
+    /// @notice inputting the NFT1155 contract
     function setNFT1155ContractAddress (address _input) public onlyOwner {
         NFT1155Contract = _input;
     }
 
+    /// @notice inputting the Listing Price (fees for setting up a listing)
     function setListingPrice (uint _listingPrice) public onlyOwner {
         ListingPrice = _listingPrice;
     }
 
+    /// @notice inputting the Auction Listing Price (fees for setting up a Auction listing)
     function setAuctionListingPrice (uint _listingPrice) public onlyOwner {
         AuctionListingPrice = _listingPrice;
     }
 
+    /// @notice Function to create NFTs - both NFT types
+    /// @param _nftType explained in struct above
+    /// @param _tokenURI explained in struct above
+    /// @dev _amountNFT1155 not applicable for NFT721 (can put in random number)
+    /// @return tokenID of the created NFT
     function createItem(bool _nftType, string memory _tokenURI, uint _amountNFT1155) public returns (bytes memory){
         if(_nftType == false){
         require (NFT721Contract != address(0), "Set the NFT721Contract Address via the function!");
@@ -105,6 +148,7 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         }      
     } 
 
+    /// @notice Function to list items for sale (fixed price)
     function listItem (address _nftContract, uint _tokenID, bool _nftType, uint _amountNFT1155, bytes memory _data, bool _currency, uint _price) public payable returns(uint){
         require (ListingPrice > 0, "The listing price needs to be setup; must be atleast 1 wei!");
         require (msg.value == ListingPrice, "The amount needs to be exactly as listing price!");
@@ -136,6 +180,7 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         return _currentItem;
     }
 
+    /// @notice Function to buy items for sale (fixed price)
     function buyItem (uint _listingID) public payable returns (bool){
         require (listingIDtoItems[_listingID].buyer == address(0), "The listing needs to be open for sale (not sold / cancelled)!");
         require (msg.value == listingIDtoItems[_listingID].price, "The amount needs to be exactly as selling price!");
@@ -157,15 +202,17 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to set up listing sale comission percent
    function listingSaleComission (uint _comission) public onlyOwner {
        listsalecomissionpercent = _comission;
     }
 
+    /// @notice Function to set up Auction listing sale comission percent
    function AuctionSaleComission (uint _comission) public onlyOwner {
        Auctioncomissionpercent = _comission;
     }
 
-
+    /// @notice Function to cancel the listing sale 
     function cancel(uint _listingID) public returns(bool) {
         require (listingIDtoItems[_listingID].buyer == address(0), "The listing needs to be open for sale (not sold / cancelled)!");
         require (listingIDtoItems[_listingID].seller == msg.sender, "The listing can only be cancelled by seller)!");
@@ -182,6 +229,7 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
+    /// @notice Function to set up Listing items on Auctions 
     function listItemOnAuction (address _nftContract, uint _tokenID, bool _nftType, bool _currency, uint _startprice, uint _amountNFT1155, bytes memory _data) public payable returns (uint){
         require (AuctionListingPrice > 0, "The Auction listing price needs to be setup; must be atleast 1 wei!");
         require (msg.value == AuctionListingPrice, "The amount needs to be exactly as Auction listing price!");
@@ -220,6 +268,7 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
         return _currentItem;
     }
 
+    /// @notice Function to bid on the auctions listed
    function makeBid (uint _auctionID) public payable returns (bool) {
         require (msg.value > auctionIDtoItems[_auctionID].lastBid, "The amount needs to be higher than last bid (or starting bid if no bids)!");
         require (auctionIDtoItems[_auctionID].AuctionStatus == true, "The auction needs to be open!");
@@ -247,7 +296,7 @@ contract MarketPlacewithAutobid is Ownable, ReentrancyGuard, ERC1155Holder {
     return true;
     }
 
-
+    /// @notice Private function to do biddingcalc - to return the previous bidder amounts
 function biddingcalc (address payable _bidder, uint _auctionID, uint _value) private returns (bool){
         if((auctionIDtoItems[_auctionID].numberofbids >= 1) && (auctionIDtoItems[_auctionID].Autobidder == address(0))){
         address payable _newadd = payable(address(auctionIDtoItems[_auctionID].lastBidder));
@@ -272,7 +321,9 @@ function biddingcalc (address payable _bidder, uint _auctionID, uint _value) pri
         return true;
 
 }
-
+    /// @notice Function to set up autobid by entering the auction ID and payable
+    /// @dev If autobid amount is within 1 percent of last bid or existing Auto bid then the entered amount is set up as the bid amount;
+    /// @dev if the autobid amount is greater than 1 percent of last bid or existing Auto bid then a bid is setup at the 1 percent higher amount and the entered auto bid amount is saved and recorded (and would be compared and used for future competing bids / auto bids)
     function autobid (uint _auctionID) public payable returns (bool){
         require (msg.value > auctionIDtoItems[_auctionID].lastBid, "The amount needs to be higher than last bid (or starting bid if no bids)!");
         require (msg.value > auctionIDtoItems[_auctionID].autobidderlimit, "The amount needs to be higher than auto bidder limit!");
@@ -314,7 +365,7 @@ function biddingcalc (address payable _bidder, uint _auctionID, uint _value) pri
     return true;
     }
 
-
+    /// @notice Function to finish auction - can only be done by seller
    function finishAuction (uint _auctionID) public returns (bool) {
         require (msg.sender == auctionIDtoItems[_auctionID].seller, "Only by Auction Seller!");
         require (auctionIDtoItems[_auctionID].AuctionStatus == true, "The auction needs to be open!");
@@ -348,6 +399,7 @@ function biddingcalc (address payable _bidder, uint _auctionID, uint _value) pri
     return true;
     }
 
+    /// @notice Function to cancel an Auction listing
    function cancelAuction (uint _auctionID) public returns (bool){
         require (msg.sender == auctionIDtoItems[_auctionID].seller, "Only by Auction Seller!");
         require (auctionIDtoItems[_auctionID].AuctionStatus == true, "The auction needs to be open!");
