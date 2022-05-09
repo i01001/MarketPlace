@@ -323,7 +323,8 @@ function biddingcalc (address payable _bidder, uint _auctionID, uint _value) pri
 }
     /// @notice Function to set up autobid by entering the auction ID and payable
     /// @dev If autobid amount is within 1 percent of last bid or existing Auto bid then the entered amount is set up as the bid amount;
-    /// @dev if the autobid amount is greater than 1 percent of last bid or existing Auto bid then a bid is setup at the 1 percent higher amount and the entered auto bid amount is saved and recorded (and would be compared and used for future competing bids / auto bids)
+    /// @dev if the autobid amount is greater than 1 percent of last bid or existing Auto bid then a bid is setup at the 1 percent 
+    /// @dev higher amount and the entered auto bid amount is saved and recorded (and would be compared and used for future competing bids / auto bids)
     function autobid (uint _auctionID) public payable returns (bool){
         require (msg.value > auctionIDtoItems[_auctionID].lastBid, "The amount needs to be higher than last bid (or starting bid if no bids)!");
         require (msg.value > auctionIDtoItems[_auctionID].autobidderlimit, "The amount needs to be higher than auto bidder limit!");
