@@ -6,11 +6,10 @@ import "@nomiclabs/hardhat-waffle";
 // import "solidity-coverage";
 import "@nomiclabs/hardhat-web3";
 
-
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-    const accounts = await hre.ethers.getSigners();
-  
-    for (const account of accounts) {
-      console.log(account.address);
-    }
-  });
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});

@@ -9,26 +9,29 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MNFT1155 is ERC1155, Ownable {
     using Counters for Counters.Counter;
-    
-  string public name;
-  string public symbol;
-  string public baseURI;
-  
-  Counters.Counter public _counter;
 
-  mapping(uint => string) public tokenURI;
+    string public name;
+    string public symbol;
+    string public baseURI;
 
-  constructor() ERC1155("") {
-    name = "NFT721MakerforMarketPlace";
-    symbol = "MNFT1155";
-  }
+    Counters.Counter public _counter;
 
-  function mint(address _to, string memory _baseURI, uint _amount) public {
-    _counter.increment();
-    uint _tokenID = _counter.current();
-    _mint(_to, _tokenID, _amount, "");
-    tokenURI[_tokenID] = _baseURI;
-    emit URI(_baseURI, _tokenID);
-  }
+    mapping(uint256 => string) public tokenURI;
+
+    constructor() ERC1155("") {
+        name = "NFT721MakerforMarketPlace";
+        symbol = "MNFT1155";
+    }
+
+    function mint(
+        address _to,
+        string memory _baseURI,
+        uint256 _amount
+    ) public {
+        _counter.increment();
+        uint256 _tokenID = _counter.current();
+        _mint(_to, _tokenID, _amount, "");
+        tokenURI[_tokenID] = _baseURI;
+        emit URI(_baseURI, _tokenID);
+    }
 }
-    

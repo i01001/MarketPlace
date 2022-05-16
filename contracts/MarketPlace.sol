@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 /// @title Market Place Contract for NFT minting, listing and auctions
-/// @author Ikhlas 
+/// @author Ikhlas
 /// @notice The contract does not have the NFT Contract hardcorded and can be used with other NFT Contracts
 /// @dev All function calls are currently implemented without side effects
 /// @custom:experimental This is an experimental contract.
@@ -15,7 +15,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
     using Counters for Counters.Counter;
 
     /// @notice Allows users to create NFT,list them or auction them.
-    /// @dev Additional features can be added such as batch minting 
+    /// @dev Additional features can be added such as batch minting
     /// @notice Counters are used for couting the listed items, sold, auction items and sold respectively.
     Counters.Counter public _counterListSale;
     Counters.Counter public _counterListSold;
@@ -38,12 +38,12 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
     uint256 public Auctioncomissionpercent = 10;
     uint256 public treasury;
 
-    /// @dev Struct for Listing created 
+    /// @dev Struct for Listing created
     /// @notice First 3 are address of seller, NFT contract and buyer
     /// @notice NFTTYPE - False for NFT721; True for NFT1155
-    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token
     /// @notice Listing ID - Market Place counter tracking listings
-    /// @notice Token ID - As per the respective NFT Contract 
+    /// @notice Token ID - As per the respective NFT Contract
     /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
     /// @notice data - applicable only for NFT1155; generally to be kept empty. In Remix use "[]"; in Hardhat use ""
     struct ItemforSale {
@@ -59,15 +59,15 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         bytes data;
     }
 
-    /// @dev Struct for Auction Listing created 
+    /// @dev Struct for Auction Listing created
     /// @notice First 4 are address of seller, NFT contract and buyer, last bidder
     /// @notice NFTTYPE - False for NFT721; True for NFT1155
-    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token 
+    /// @dev Currency - Not implemented feature - False for Ethereum; True for Market Place Token
     /// @notice Auction Status - True for Auction Open; False for Auction Closed
     /// @notice Starting Price - bids need to be higher than this
     /// @notice Auction ID - Market Place counter for auction tracking listings
-    /// @notice Token ID - As per the respective NFT Contract 
-    /// @notice startTime - Time setting up the auction 
+    /// @notice Token ID - As per the respective NFT Contract
+    /// @notice startTime - Time setting up the auction
     /// @notice lastbid - last bid value
     /// @notice numberofbids - count of bids
     /// @notice amountNFT1155 - Number of NFT1155 to be listed / not applicable for NFT721
@@ -226,6 +226,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         treasury += ListingPrice;
         return _currentItem;
     }
+
     /// @notice Function to buy items for sale (fixed price)
     function buyItem(uint256 _listingID) public payable returns (bool) {
         require(
@@ -283,7 +284,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         Auctioncomissionpercent = _comission;
     }
 
-    /// @notice Function to cancel the listing sale 
+    /// @notice Function to cancel the listing sale
     function cancel(uint256 _listingID) public returns (bool) {
         require(
             listingIDtoItems[_listingID].buyer == address(0),
@@ -324,7 +325,7 @@ contract MarketPlace is Ownable, ReentrancyGuard, ERC1155Holder {
         return true;
     }
 
-    /// @notice Function to set up Listing items on Auctions 
+    /// @notice Function to set up Listing items on Auctions
     function listItemOnAuction(
         address _nftContract,
         uint256 _tokenID,

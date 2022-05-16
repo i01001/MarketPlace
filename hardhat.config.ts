@@ -9,8 +9,6 @@ import "solidity-coverage";
 import "./tasks/index.ts";
 import "@nomiclabs/hardhat-web3";
 
-
-
 dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -34,10 +32,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
       forking: {
-          url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
-          blockNumber: 14639968
-      }
-  },
+        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`,
+        blockNumber: 14639968,
+      },
+    },
     rinkeby: {
       url: process.env.RINKEBY_URL || "",
       accounts:

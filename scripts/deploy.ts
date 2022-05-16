@@ -19,10 +19,15 @@ async function main() {
   await marketPlace.deployed();
   console.log("MarketPlace deployed to:", marketPlace.address);
 
-  const MarketPlacewithAutobid = await ethers.getContractFactory("MarketPlacewithAutobid");
+  const MarketPlacewithAutobid = await ethers.getContractFactory(
+    "MarketPlacewithAutobid"
+  );
   const marketPlacewithAutobid = await MarketPlacewithAutobid.deploy();
   await marketPlacewithAutobid.deployed();
-  console.log("MarketPlacewithAutobid deployed to:", marketPlacewithAutobid.address);
+  console.log(
+    "MarketPlacewithAutobid deployed to:",
+    marketPlacewithAutobid.address
+  );
 
   const MNFT1155 = await ethers.getContractFactory("MNFT1155");
   const mNFT1155 = await MNFT1155.deploy();
@@ -33,7 +38,6 @@ async function main() {
   const mNFT721 = await MNFT721.deploy();
   await mNFT721.deployed();
   console.log("MNFT721 deployed to:", mNFT721.address);
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere

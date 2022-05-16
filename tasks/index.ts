@@ -11,6 +11,5 @@ import { solidity } from "ethereum-waffle";
 import "@nomiclabs/hardhat-web3";
 import { ethers } from "hardhat";
 
-
-import './accounts.ts';
-import './mint.ts';
+import "./accounts.ts";
+import "./mint.ts";
